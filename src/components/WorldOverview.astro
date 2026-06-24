@@ -1,0 +1,123 @@
+---
+import { siteConfig } from '../config/site';
+---
+
+<section class="world-overview">
+  <span class="inventory-label">World overview</span>
+  <dl class="world-overview__grid">
+    <div class="world-overview__item">
+      <dt>Version</dt>
+      <dd>{siteConfig.worldOverview.currentVersion}</dd>
+    </div>
+    <div class="world-overview__item">
+      <dt>Phase</dt>
+      <dd>{siteConfig.worldOverview.currentPhase}</dd>
+    </div>
+    <div class="world-overview__item">
+      <dt>Main base</dt>
+      <dd>{siteConfig.worldOverview.mainBase}</dd>
+    </div>
+    <div class="world-overview__item">
+      <dt>Playtime</dt>
+      <dd>{siteConfig.worldOverview.playtime}</dd>
+    </div>
+  </dl>
+  {siteConfig.currentObjectives.length > 0 && (
+    <div class="world-overview__objectives">
+      <span class="inventory-label">Current objectives</span>
+      <ul class="world-overview__objectives-list">
+        {siteConfig.currentObjectives.map((objective) => (
+          <li>{objective}</li>
+        ))}
+      </ul>
+    </div>
+  )}
+  {siteConfig.worldOverview.statistics.length > 0 && (
+    <div class="world-overview__stats">
+      {siteConfig.worldOverview.statistics.map(({ label, value }) => (
+        <div class="world-overview__stat">
+          <span class="world-overview__stat-value">{value}</span>
+          <span class="world-overview__stat-label">{label}</span>
+        </div>
+      ))}
+    </div>
+  )}
+</section>
+
+<style>
+  .world-overview {
+    padding: var(--space-xl);
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .world-overview__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+    gap: var(--space-md);
+    margin: var(--space-md) 0 var(--space-lg);
+  }
+
+  .world-overview__item dt {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-xs);
+  }
+
+  .world-overview__item dd {
+    margin: 0;
+    font-weight: 600;
+    font-size: 0.9375rem;
+  }
+
+  .world-overview__objectives {
+    margin-bottom: var(--space-lg);
+  }
+
+  .world-overview__objectives-list {
+    list-style: none;
+    padding: 0;
+    margin: var(--space-sm) 0 0;
+    display: grid;
+    gap: var(--space-xs);
+  }
+
+  .world-overview__objectives-list li {
+    padding: var(--space-sm) var(--space-md);
+    background: var(--color-bg-alt);
+    border: 1px solid var(--color-border);
+    font-size: 0.9375rem;
+  }
+
+  .world-overview__stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
+    gap: var(--space-md);
+    padding-top: var(--space-lg);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .world-overview__stat {
+    text-align: center;
+    padding: var(--space-md);
+    background: var(--color-bg-alt);
+    border: 1px solid var(--color-border);
+  }
+
+  .world-overview__stat-value {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--color-accent-dark);
+  }
+
+  .world-overview__stat-label {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+  }
+</style>

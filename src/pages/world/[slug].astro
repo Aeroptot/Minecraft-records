@@ -1,0 +1,41 @@
+---
+import { getCollection, render } from 'astro:content';
+import WorldEntryLayout from '../../layouts/WorldEntryLayout.astro';
+import { isPublished, sortByDateAsc, withBase, getSlug, collectionUrl } from '../../utils/content';
+
+export async function getStaticPaths() {
+  const entries = sortByDateAsc(
+    (await getCollection('world')).filter(isPublished)
+  );
+  const articles = (await getCollection('articles')).filter(isPublished);
+
+  return entries.map((entry, index) => {
+    const related = entry.data.relatedArticles
+      .map((href) => {
+        const slug = href.replace(/^\/articles\/|\/$/g, '');
+        const article = articles.find((a) => getSlug(a.id) === slug);
+        return article
+          ? { href: collectionUrl('articles', article.id), title: article.data.title }
+          : null;
+      })
+      .filter(Boolean);
+
+    return {
+      params: { slug: getSlug(entry.id) },
+      props: {
+        entry,
+        prev: entries[index - 1],
+        next: entries[index + 1],
+        relatedArticles: related,
+      },
+    };
+  });
+}
+
+const { entry, prev, next, relatedArticles } = Astro.props;
+const { Content } = await render(entry);
+---
+
+<WorldEntryLayout entry={entry} prev={prev} next={next} relatedArticles={relatedArticles}>
+  <Content />
+</WorldEntryLayout>

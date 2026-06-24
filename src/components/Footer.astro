@@ -1,0 +1,84 @@
+---
+import { siteConfig } from '../config/site';
+---
+
+<footer class="footer">
+  <div class="footer__inner container">
+    <div class="footer__brand">
+      <span class="footer__name">{siteConfig.name}</span>
+      <p class="footer__desc">{siteConfig.tagline}</p>
+    </div>
+
+    <div class="footer__links">
+      <span class="inventory-label">Links</span>
+      <ul>
+        {siteConfig.externalLinks.map(({ label, href }) => (
+          <li><a href={href} target="_blank" rel="noopener noreferrer">{label}</a></li>
+        ))}
+      </ul>
+    </div>
+
+    <div class="footer__meta">
+      <p>Built with Astro · Deployed on GitHub Pages</p>
+      <p>&copy; {siteConfig.copyrightYear} {siteConfig.name}</p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    margin-top: var(--space-3xl);
+    padding-block: var(--space-2xl);
+    background: var(--color-bg-card);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .footer__inner {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: var(--space-2xl);
+  }
+
+  .footer__name {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+
+  .footer__desc {
+    color: var(--color-text-muted);
+    margin-top: var(--space-sm);
+    max-width: 24rem;
+  }
+
+  .footer__links ul {
+    list-style: none;
+    padding: 0;
+    margin: var(--space-sm) 0 0;
+  }
+
+  .footer__links li {
+    margin-bottom: var(--space-xs);
+  }
+
+  .footer__links a {
+    text-decoration: none;
+    font-size: 0.9375rem;
+  }
+
+  .footer__meta {
+    font-size: 0.8125rem;
+    color: var(--color-text-muted);
+  }
+
+  .footer__meta p {
+    margin-bottom: var(--space-xs);
+  }
+
+  @media (max-width: 768px) {
+    .footer__inner {
+      grid-template-columns: 1fr;
+      gap: var(--space-xl);
+    }
+  }
+</style>

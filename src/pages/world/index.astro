@@ -1,0 +1,150 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import WorldOverview from '../../components/WorldOverview.astro';
+import WorldTimelineCard from '../../components/WorldTimelineCard.astro';
+import { getCollection } from 'astro:content';
+import { isPublished, sortByDateDesc, withBase } from '../../utils/content';
+
+const allEntries = (await getCollection('world')).filter(isPublished);
+const featuredGallery = allEntries
+  .flatMap((e) => (e.data.gallery.length > 0 ? e.data.gallery : e.data.cover ? [e.data.cover] : []))
+  .slice(0, 6);
+---
+
+<BaseLayout title="World Timeline" description="Chronological development of my Minecraft single-player world.">
+  <section class="world-header">
+    <div class="container">
+      <span class="section__label">World archive</span>
+      <h1>World timeline</h1>
+      <p class="world-header__desc">
+        A living record of milestones, builds, and discoveries across my single-player world.
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <WorldOverview />
+    </div>
+  </section>
+
+  {featuredGallery.length > 0 && (
+    <section class="section section--gallery">
+      <div class="container">
+        <span class="section__label">Gallery</span>
+        <h2 class="section__title">World screenshots</h2>
+        <div class="world-gallery">
+          {featuredGallery.map((src) => (
+            <figure class="world-gallery__item">
+              <img src={withBase(src)} alt="" loading="lazy" />
+            </figure>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <section class="section">
+    <div class="container">
+      <div class="timeline-controls">
+        <span class="inventory-label">Sort order</span>
+        <div class="timeline-controls__buttons">
+          <button class="tag tag--active" id="sort-newest" data-order="newest">Newest first</button>
+          <button class="tag" id="sort-oldest" data-order="oldest">Oldest first</button>
+        </div>
+      </div>
+
+      <div class="timeline" id="timeline">
+        {sortByDateDesc(allEntries).map((entry, i) => (
+          <div class="timeline__item" data-date={entry.data.date.getTime()}>
+            <WorldTimelineCard entry={entry} index={i} />
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  const timeline = document.getElementById('timeline');
+  const items = Array.from(timeline?.querySelectorAll('.timeline__item') ?? []);
+  const btnNewest = document.getElementById('sort-newest');
+  const btnOldest = document.getElementById('sort-oldest');
+
+  function sortTimeline(order: 'newest' | 'oldest') {
+    const sorted = [...items].sort((a, b) => {
+      const dateA = Number((a as HTMLElement).dataset.date);
+      const dateB = Number((b as HTMLElement).dataset.date);
+      return order === 'newest' ? dateB - dateA : dateA - dateB;
+    });
+    sorted.forEach((item) => timeline?.appendChild(item));
+
+    btnNewest?.classList.toggle('tag--active', order === 'newest');
+    btnOldest?.classList.toggle('tag--active', order === 'oldest');
+  }
+
+  btnNewest?.addEventListener('click', () => sortTimeline('newest'));
+  btnOldest?.addEventListener('click', () => sortTimeline('oldest'));
+</script>
+
+<style>
+  .world-header {
+    padding-block: var(--space-2xl);
+    background: var(--color-bg-card);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .world-header h1 {
+    margin: var(--space-sm) 0;
+  }
+
+  .world-header__desc {
+    color: var(--color-text-muted);
+    max-width: 36rem;
+  }
+
+  .section--gallery {
+    background: var(--color-bg-alt);
+  }
+
+  .world-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr));
+    gap: var(--space-md);
+  }
+
+  .world-gallery__item img {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-sm);
+    transition: transform var(--transition), box-shadow var(--transition);
+  }
+
+  .world-gallery__item img:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .timeline-controls {
+    margin-bottom: var(--space-2xl);
+  }
+
+  .timeline-controls__buttons {
+    display: flex;
+    gap: var(--space-xs);
+    margin-top: var(--space-sm);
+  }
+
+  .timeline-controls__buttons button {
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  .timeline {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xl);
+  }
+</style>

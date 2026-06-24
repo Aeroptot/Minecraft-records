@@ -1,0 +1,31 @@
+---
+import { getCollection, render } from 'astro:content';
+import ArticleLayout from '../../layouts/ArticleLayout.astro';
+import { isPublished, sortByDateDesc, extractHeadings, getRelatedArticles, getSlug, collectionUrl } from '../../utils/content';
+
+export async function getStaticPaths() {
+  const articles = sortByDateDesc(
+    (await getCollection('articles')).filter(isPublished)
+  );
+
+  return articles.map((entry, index) => ({
+    params: { slug: getSlug(entry.id) },
+    props: {
+      entry,
+      prev: articles[index + 1],
+      next: articles[index - 1],
+      related: getRelatedArticles(entry, articles),
+    },
+  }));
+}
+
+const { entry, prev, next, related } = Astro.props;
+const { Content, headings: astroHeadings } = await render(entry);
+const headings = astroHeadings.length > 0
+  ? astroHeadings.map((h) => ({ depth: h.depth, text: h.text, slug: h.slug }))
+  : extractHeadings(entry.body ?? '');
+---
+
+<ArticleLayout entry={entry} prev={prev} next={next} related={related} headings={headings}>
+  <Content />
+</ArticleLayout>

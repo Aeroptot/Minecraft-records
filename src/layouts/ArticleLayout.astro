@@ -1,0 +1,221 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import TableOfContents from '../components/TableOfContents.astro';
+import ArticleCard from '../components/ArticleCard.astro';
+import { formatDate, estimateReadingTime, getRelatedArticles, withBase, collectionUrl } from '../utils/content';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  entry: CollectionEntry<'articles'>;
+  prev?: CollectionEntry<'articles'>;
+  next?: CollectionEntry<'articles'>;
+  related?: CollectionEntry<'articles'>[];
+  headings: { depth: number; text: string; slug: string }[];
+}
+
+const { entry, prev, next, related = [], headings } = Astro.props;
+const { title, description, date, updated, tags, category, cover } = entry.data;
+const readingTime = estimateReadingTime(entry.body ?? '');
+---
+
+<BaseLayout title={title} description={description} image={cover}>
+  <article class="article">
+    <header class="article__header">
+      <div class="container container--narrow">
+        <a href={withBase('/articles/')} class="article__back">← All articles</a>
+        <span class="inventory-label">{category}</span>
+        <h1 class="article__title">{title}</h1>
+        <p class="article__desc">{description}</p>
+        <div class="article__meta">
+          <time datetime={date.toISOString()}>{formatDate(date)}</time>
+          {updated && updated.getTime() !== date.getTime() && (
+            <span>Updated {formatDate(updated)}</span>
+          )}
+          <span>{readingTime} min read</span>
+        </div>
+        {tags.length > 0 && (
+          <div class="article__tags">
+            {tags.map((tag) => <span class="tag">{tag}</span>)}
+          </div>
+        )}
+      </div>
+      {cover && (
+        <div class="article__cover-wrap container">
+          <img src={withBase(cover)} alt="" class="article__cover" />
+        </div>
+      )}
+    </header>
+
+    <div class="article__layout container">
+      {headings.length > 2 && (
+        <aside class="article__toc">
+          <TableOfContents headings={headings} />
+        </aside>
+      )}
+      <div class="article__content prose">
+        <slot />
+      </div>
+    </div>
+
+    {(prev || next) && (
+      <nav class="article__nav container container--narrow" aria-label="Article navigation">
+        {prev ? (
+          <a href={collectionUrl('articles', prev.id)} class="article__nav-link article__nav-link--prev">
+            <span class="article__nav-label">Previous</span>
+            <span class="article__nav-title">{prev.data.title}</span>
+          </a>
+        ) : <div />}
+        {next ? (
+          <a href={collectionUrl('articles', next.id)} class="article__nav-link article__nav-link--next">
+            <span class="article__nav-label">Next</span>
+            <span class="article__nav-title">{next.data.title}</span>
+          </a>
+        ) : <div />}
+      </nav>
+    )}
+
+    {related.length > 0 && (
+      <section class="article__related section">
+        <div class="container">
+          <span class="section__label">Related</span>
+          <h2 class="section__title">Related articles</h2>
+          <div class="grid grid--3">
+            {related.map((article) => <ArticleCard article={article} />)}
+          </div>
+        </div>
+      </section>
+    )}
+  </article>
+</BaseLayout>
+
+<style>
+  .article__header {
+    padding-block: var(--space-2xl) var(--space-xl);
+    background: var(--color-bg-card);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .article__back {
+    display: inline-block;
+    font-size: 0.875rem;
+    margin-bottom: var(--space-lg);
+    text-decoration: none;
+  }
+
+  .article__title {
+    margin: var(--space-sm) 0;
+  }
+
+  .article__desc {
+    font-size: 1.125rem;
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-md);
+  }
+
+  .article__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-md);
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-md);
+  }
+
+  .article__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+  }
+
+  .article__cover-wrap {
+    margin-top: var(--space-xl);
+  }
+
+  .article__cover {
+    width: 100%;
+    max-height: 28rem;
+    object-fit: cover;
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-md);
+  }
+
+  .article__layout {
+    display: grid;
+    grid-template-columns: 14rem 1fr;
+    gap: var(--space-2xl);
+    padding-block: var(--space-2xl);
+    align-items: start;
+  }
+
+  .article__toc {
+    position: sticky;
+    top: calc(var(--nav-height) + var(--space-lg));
+  }
+
+  .article__content {
+    min-width: 0;
+  }
+
+  .article__nav {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-lg);
+    padding-block: var(--space-2xl);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .article__nav-link {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    padding: var(--space-lg);
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    text-decoration: none;
+    transition: border-color var(--transition), box-shadow var(--transition);
+  }
+
+  .article__nav-link:hover {
+    border-color: var(--color-accent);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .article__nav-link--next {
+    text-align: right;
+  }
+
+  .article__nav-label {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-accent);
+  }
+
+  .article__nav-title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    color: var(--color-text);
+  }
+
+  @media (max-width: 900px) {
+    .article__layout {
+      grid-template-columns: 1fr;
+    }
+
+    .article__toc {
+      position: static;
+      order: -1;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .article__nav {
+      grid-template-columns: 1fr;
+    }
+
+    .article__nav-link--next {
+      text-align: left;
+    }
+  }
+</style>

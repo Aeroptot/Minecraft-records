@@ -1,0 +1,249 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import { formatDate, withBase, collectionUrl } from '../utils/content';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  entry: CollectionEntry<'world'>;
+  prev?: CollectionEntry<'world'>;
+  next?: CollectionEntry<'world'>;
+  relatedArticles?: { href: string; title: string }[];
+}
+
+const { entry, prev, next, relatedArticles = [] } = Astro.props;
+const {
+  title,
+  description,
+  date,
+  minecraftVersion,
+  phase,
+  location,
+  coordinates,
+  tags,
+  cover,
+  gallery,
+} = entry.data;
+---
+
+<BaseLayout title={title} description={description} image={cover}>
+  <article class="world-entry">
+    <header class="world-entry__header">
+      <div class="container container--narrow">
+        <a href={withBase('/world/')} class="world-entry__back">← World timeline</a>
+        <span class="inventory-label">{phase}</span>
+        <h1 class="world-entry__title">{title}</h1>
+        <p class="world-entry__desc">{description}</p>
+        <dl class="world-entry__meta">
+          <div><dt>Date</dt><dd><time datetime={date.toISOString()}>{formatDate(date)}</time></dd></div>
+          <div><dt>Version</dt><dd>{minecraftVersion}</dd></div>
+          {location && <div><dt>Location</dt><dd>{location}</dd></div>}
+          {coordinates && <div><dt>Coordinates</dt><dd><code>{coordinates}</code></dd></div>}
+        </dl>
+        {tags.length > 0 && (
+          <div class="world-entry__tags">
+            {tags.map((tag) => <span class="tag">{tag}</span>)}
+          </div>
+        )}
+      </div>
+      {cover && (
+        <div class="world-entry__cover-wrap container">
+          <img src={withBase(cover)} alt="" class="world-entry__cover" />
+        </div>
+      )}
+    </header>
+
+    <div class="world-entry__content container container--narrow prose">
+      <slot />
+    </div>
+
+    {gallery.length > 0 && (
+      <section class="world-entry__gallery section">
+        <div class="container">
+          <span class="section__label">Gallery</span>
+          <h2 class="section__title">Screenshots</h2>
+          <div class="world-entry__gallery-grid">
+            {gallery.map((src) => (
+              <figure class="world-entry__gallery-item">
+                <img src={withBase(src)} alt="" loading="lazy" />
+              </figure>
+            ))}
+          </div>
+        </div>
+      </section>
+    )}
+
+    {relatedArticles.length > 0 && (
+      <section class="world-entry__related section">
+        <div class="container container--narrow">
+          <span class="section__label">Related</span>
+          <h2 class="section__title">Related articles</h2>
+          <ul class="world-entry__related-list">
+            {relatedArticles.map(({ href, title: articleTitle }) => (
+              <li><a href={href}>{articleTitle}</a></li>
+            ))}
+          </ul>
+        </div>
+      </section>
+    )}
+
+    {(prev || next) && (
+      <nav class="world-entry__nav container container--narrow" aria-label="Timeline navigation">
+        {prev ? (
+          <a href={collectionUrl('world', prev.id)} class="world-entry__nav-link">
+            <span class="world-entry__nav-label">← Earlier</span>
+            <span>{prev.data.title}</span>
+          </a>
+        ) : <div />}
+        {next ? (
+          <a href={collectionUrl('world', next.id)} class="world-entry__nav-link world-entry__nav-link--next">
+            <span class="world-entry__nav-label">Later →</span>
+            <span>{next.data.title}</span>
+          </a>
+        ) : <div />}
+      </nav>
+    )}
+  </article>
+</BaseLayout>
+
+<style>
+  .world-entry__header {
+    padding-block: var(--space-2xl) var(--space-xl);
+    background: var(--color-bg-card);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .world-entry__back {
+    display: inline-block;
+    font-size: 0.875rem;
+    margin-bottom: var(--space-lg);
+    text-decoration: none;
+  }
+
+  .world-entry__title {
+    margin: var(--space-sm) 0;
+  }
+
+  .world-entry__desc {
+    font-size: 1.125rem;
+    color: var(--color-text-muted);
+  }
+
+  .world-entry__meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+    gap: var(--space-md);
+    margin: var(--space-lg) 0;
+    padding: var(--space-lg);
+    background: var(--color-bg-alt);
+    border: 1px solid var(--color-border);
+  }
+
+  .world-entry__meta dt {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-xs);
+  }
+
+  .world-entry__meta dd {
+    margin: 0;
+    font-weight: 500;
+  }
+
+  .world-entry__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+  }
+
+  .world-entry__cover-wrap {
+    margin-top: var(--space-xl);
+  }
+
+  .world-entry__cover {
+    width: 100%;
+    max-height: 28rem;
+    object-fit: cover;
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-md);
+  }
+
+  .world-entry__content {
+    padding-block: var(--space-2xl);
+  }
+
+  .world-entry__gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+    gap: var(--space-lg);
+  }
+
+  .world-entry__gallery-item img {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow var(--transition);
+  }
+
+  .world-entry__gallery-item img:hover {
+    box-shadow: var(--shadow-md);
+  }
+
+  .world-entry__related-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .world-entry__related-list li {
+    padding: var(--space-sm) 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .world-entry__nav {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-lg);
+    padding-block: var(--space-2xl);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .world-entry__nav-link {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    padding: var(--space-lg);
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    text-decoration: none;
+    transition: border-color var(--transition);
+  }
+
+  .world-entry__nav-link:hover {
+    border-color: var(--color-accent);
+  }
+
+  .world-entry__nav-link--next {
+    text-align: right;
+  }
+
+  .world-entry__nav-label {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-accent);
+  }
+
+  @media (max-width: 600px) {
+    .world-entry__nav {
+      grid-template-columns: 1fr;
+    }
+
+    .world-entry__nav-link--next {
+      text-align: left;
+    }
+  }
+</style>

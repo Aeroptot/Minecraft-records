@@ -1,0 +1,184 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import { getCollection } from 'astro:content';
+import { isPublished, sortByDateDesc } from '../../utils/content';
+
+const articles = sortByDateDesc(
+  (await getCollection('articles')).filter(isPublished)
+);
+
+const allTags = [...new Set(articles.flatMap((a) => a.data.tags))].sort();
+const allCategories = [...new Set(articles.map((a) => a.data.category))].sort();
+---
+
+<BaseLayout title="Articles" description="Tutorials, guides, and build notes from my Minecraft world.">
+  <section class="archive-header">
+    <div class="container">
+      <span class="section__label">Archive</span>
+      <h1>Articles</h1>
+      <p class="archive-header__desc">
+        Tutorials, redstone guides, technical notes, and build documentation — all generated from Markdown.
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="archive-controls" id="archive-controls">
+        <div class="archive-controls__search">
+          <label for="article-search" class="sr-only">Search articles</label>
+          <input
+            type="search"
+            id="article-search"
+            placeholder="Search by title, description, or tag…"
+            class="archive-controls__input"
+          />
+        </div>
+        {allCategories.length > 1 && (
+          <div class="archive-controls__filters">
+            <span class="inventory-label">Category</span>
+            <div class="archive-controls__tags" id="category-filters">
+              <button class="tag tag--active" data-filter="all" data-type="category">All</button>
+              {allCategories.map((cat) => (
+                <button class="tag" data-filter={cat} data-type="category">{cat}</button>
+              ))}
+            </div>
+          </div>
+        )}
+        {allTags.length > 0 && (
+          <div class="archive-controls__filters">
+            <span class="inventory-label">Tags</span>
+            <div class="archive-controls__tags" id="tag-filters">
+              <button class="tag tag--active" data-filter="all" data-type="tag">All</button>
+              {allTags.map((tag) => (
+                <button class="tag" data-filter={tag} data-type="tag">{tag}</button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div class="grid grid--3" id="article-grid">
+        {articles.map((article) => (
+          <div
+            class="article-grid-item"
+            data-title={article.data.title.toLowerCase()}
+            data-desc={article.data.description.toLowerCase()}
+            data-tags={article.data.tags.join(',').toLowerCase()}
+            data-category={article.data.category.toLowerCase()}
+          >
+            <ArticleCard article={article} />
+          </div>
+        ))}
+      </div>
+
+      <p class="archive-empty" id="archive-empty" hidden>No articles match your filters.</p>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  const searchInput = document.getElementById('article-search') as HTMLInputElement;
+  const grid = document.getElementById('article-grid');
+  const emptyMsg = document.getElementById('archive-empty');
+  const items = grid?.querySelectorAll('.article-grid-item') ?? [];
+
+  let activeCategory = 'all';
+  let activeTag = 'all';
+
+  function applyFilters() {
+    const query = searchInput?.value.toLowerCase().trim() ?? '';
+    let visible = 0;
+
+    items.forEach((item) => {
+      const el = item as HTMLElement;
+      const title = el.dataset.title ?? '';
+      const desc = el.dataset.desc ?? '';
+      const tags = el.dataset.tags ?? '';
+      const category = el.dataset.category ?? '';
+
+      const matchesSearch = !query || title.includes(query) || desc.includes(query) || tags.includes(query);
+      const matchesCategory = activeCategory === 'all' || category === activeCategory.toLowerCase();
+      const matchesTag = activeTag === 'all' || tags.split(',').includes(activeTag.toLowerCase());
+
+      const show = matchesSearch && matchesCategory && matchesTag;
+      (el as HTMLElement).style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+
+    if (emptyMsg) emptyMsg.hidden = visible > 0;
+  }
+
+  searchInput?.addEventListener('input', applyFilters);
+
+  document.querySelectorAll('[data-type="category"]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-type="category"]').forEach((b) => b.classList.remove('tag--active'));
+      btn.classList.add('tag--active');
+      activeCategory = (btn as HTMLElement).dataset.filter ?? 'all';
+      applyFilters();
+    });
+  });
+
+  document.querySelectorAll('[data-type="tag"]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-type="tag"]').forEach((b) => b.classList.remove('tag--active'));
+      btn.classList.add('tag--active');
+      activeTag = (btn as HTMLElement).dataset.filter ?? 'all';
+      applyFilters();
+    });
+  });
+</script>
+
+<style>
+  .archive-header {
+    padding-block: var(--space-2xl);
+    background: var(--color-bg-card);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .archive-header h1 {
+    margin: var(--space-sm) 0;
+  }
+
+  .archive-header__desc {
+    color: var(--color-text-muted);
+    max-width: 36rem;
+  }
+
+  .archive-controls {
+    margin-bottom: var(--space-2xl);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+  }
+
+  .archive-controls__input {
+    width: 100%;
+    max-width: 28rem;
+    padding: var(--space-sm) var(--space-md);
+    font-family: var(--font-sans);
+    font-size: 0.9375rem;
+    border: 1px solid var(--color-border-strong);
+    background: var(--color-bg-card);
+  }
+
+  .archive-controls__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+    margin-top: var(--space-sm);
+  }
+
+  .archive-controls__tags button {
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  .archive-empty {
+    text-align: center;
+    color: var(--color-text-muted);
+    padding: var(--space-2xl);
+  }
+</style>

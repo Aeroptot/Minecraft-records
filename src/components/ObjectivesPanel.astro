@@ -1,0 +1,52 @@
+---
+import { siteConfig } from '../config/site';
+---
+
+<section class="objectives">
+  <span class="inventory-label">Currently working on</span>
+  <ul class="objectives__list">
+    {siteConfig.currentObjectives.map((objective) => (
+      <li class="objectives__item">
+        <span class="objectives__check" aria-hidden="true"></span>
+        {objective}
+      </li>
+    ))}
+  </ul>
+</section>
+
+<style>
+  .objectives {
+    padding: var(--space-xl);
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .objectives__list {
+    list-style: none;
+    padding: 0;
+    margin: var(--space-md) 0 0;
+  }
+
+  .objectives__item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-sm);
+    padding: var(--space-sm) 0;
+    border-bottom: 1px solid var(--color-border);
+    font-size: 0.9375rem;
+  }
+
+  .objectives__item:last-child {
+    border-bottom: none;
+  }
+
+  .objectives__check {
+    flex-shrink: 0;
+    width: 0.75rem;
+    height: 0.75rem;
+    margin-top: 0.35rem;
+    border: 2px solid var(--color-accent);
+    background: var(--color-accent-light);
+  }
+</style>

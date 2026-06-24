@@ -1,0 +1,263 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ArticleCard from '../components/ArticleCard.astro';
+import WorldTimelineCard from '../components/WorldTimelineCard.astro';
+import ObjectivesPanel from '../components/ObjectivesPanel.astro';
+import { getCollection } from 'astro:content';
+import { siteConfig } from '../config/site';
+import { isPublished, sortByDateDesc, withBase, collectionUrl } from '../utils/content';
+
+const allArticles = sortByDateDesc(
+  (await getCollection('articles')).filter(isPublished)
+);
+const allWorld = sortByDateDesc(
+  (await getCollection('world')).filter(isPublished)
+);
+
+const latestArticles = allArticles.slice(0, 3);
+const latestWorld = allWorld.slice(0, 3);
+const featuredWorld = allWorld.find((e) => e.data.featured) ?? allWorld[0];
+---
+
+<BaseLayout>
+  <section class="hero">
+    <div class="hero__inner container">
+      <div class="hero__content">
+        <span class="section__label">Single-player archive</span>
+        <h1 class="hero__title">{siteConfig.title}</h1>
+        <p class="hero__tagline">{siteConfig.tagline}</p>
+        <p class="hero__bio">{siteConfig.bio}</p>
+        <div class="hero__actions">
+          <a href={withBase('/articles/')} class="btn btn--primary">Browse articles</a>
+          <a href={withBase('/world/')} class="btn btn--secondary">World timeline</a>
+          <a href={siteConfig.modrinth} class="btn btn--ghost" target="_blank" rel="noopener noreferrer">Modrinth</a>
+        </div>
+      </div>
+      <div class="hero__visual">
+        <img
+          src={withBase(siteConfig.heroImage)}
+          alt="Placeholder hero screenshot — replace with your world panorama"
+          class="hero__image"
+        />
+        <div class="hero__visual-accent" aria-hidden="true"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="home-grid">
+        <ObjectivesPanel />
+        <div class="home-intro card">
+          <span class="inventory-label">About this project</span>
+          <p>{siteConfig.projectIntro}</p>
+          <p class="home-intro__note">
+            Edit your introduction in <code>src/config/site.ts</code>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {featuredWorld && (
+    <section class="section featured-visual">
+      <div class="container">
+        <span class="section__label">Featured</span>
+        <h2 class="section__title">From the world</h2>
+        <a href={collectionUrl('world', featuredWorld.id)} class="featured-visual__link">
+          <img
+            src={withBase(featuredWorld.data.cover ?? siteConfig.featuredScreenshot)}
+            alt={`Featured: ${featuredWorld.data.title}`}
+            class="featured-visual__image"
+          />
+          <div class="featured-visual__caption">
+            <span>{featuredWorld.data.title}</span>
+            <span class="featured-visual__arrow">→</span>
+          </div>
+        </a>
+      </div>
+    </section>
+  )}
+
+  <section class="section">
+    <div class="container">
+      <div class="section__header">
+        <span class="section__label">Articles</span>
+        <h2 class="section__title">Latest articles</h2>
+        <p class="section__desc">Tutorials, build notes, and technical write-ups from the world.</p>
+      </div>
+      {latestArticles.length > 0 ? (
+        <div class="grid grid--3">
+          {latestArticles.map((article) => <ArticleCard article={article} />)}
+        </div>
+      ) : (
+        <p>No articles published yet. Add one to <code>src/content/articles/</code>.</p>
+      )}
+      <div class="section__footer">
+        <a href={withBase('/articles/')} class="btn btn--secondary">View all articles</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--alt">
+    <div class="container">
+      <div class="section__header">
+        <span class="section__label">World progress</span>
+        <h2 class="section__title">Recent milestones</h2>
+        <p class="section__desc">Chronological snapshots of how the world has evolved.</p>
+      </div>
+      {latestWorld.length > 0 ? (
+        <div class="home-timeline">
+          {latestWorld.map((entry, i) => (
+            <WorldTimelineCard entry={entry} index={i} />
+          ))}
+        </div>
+      ) : (
+        <p>No world entries yet. Add one to <code>src/content/world/</code>.</p>
+      )}
+      <div class="section__footer">
+        <a href={withBase('/world/')} class="btn btn--secondary">Full timeline</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .hero {
+    padding-block: var(--space-3xl);
+    background: linear-gradient(180deg, var(--color-bg-card) 0%, var(--color-bg) 100%);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .hero__inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-2xl);
+    align-items: center;
+  }
+
+  .hero__title {
+    margin: var(--space-sm) 0;
+  }
+
+  .hero__tagline {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    color: var(--color-accent-dark);
+    margin-bottom: var(--space-md);
+  }
+
+  .hero__bio {
+    color: var(--color-text-muted);
+    max-width: 32rem;
+  }
+
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    margin-top: var(--space-xl);
+  }
+
+  .hero__visual {
+    position: relative;
+  }
+
+  .hero__image {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .hero__visual-accent {
+    position: absolute;
+    bottom: -8px;
+    right: -8px;
+    width: 60%;
+    height: 60%;
+    border: 2px solid var(--color-accent);
+    z-index: -1;
+  }
+
+  .home-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: var(--space-xl);
+  }
+
+  .home-intro {
+    padding: var(--space-xl);
+  }
+
+  .home-intro__note {
+    font-size: 0.8125rem;
+    color: var(--color-text-muted);
+    margin-bottom: 0;
+  }
+
+  .featured-visual__link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .featured-visual__image {
+    width: 100%;
+    max-height: 24rem;
+    object-fit: cover;
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-md);
+    transition: box-shadow var(--transition);
+  }
+
+  .featured-visual__link:hover .featured-visual__image {
+    box-shadow: var(--shadow-lg);
+  }
+
+  .featured-visual__caption {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-md) var(--space-lg);
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-top: none;
+    font-family: var(--font-display);
+    font-weight: 600;
+  }
+
+  .featured-visual__arrow {
+    color: var(--color-accent);
+  }
+
+  .section--alt {
+    background: var(--color-bg-alt);
+  }
+
+  .section__footer {
+    margin-top: var(--space-2xl);
+    text-align: center;
+  }
+
+  .home-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+  }
+
+  @media (max-width: 900px) {
+    .hero__inner {
+      grid-template-columns: 1fr;
+    }
+
+    .hero__visual {
+      order: -1;
+    }
+
+    .home-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

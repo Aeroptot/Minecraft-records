@@ -1,0 +1,32 @@
+---
+import { formatDate, withBase, collectionUrl } from '../utils/content';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  article: CollectionEntry<'articles'>;
+}
+
+const { article } = Astro.props;
+const { title, description, date, tags, category, cover } = article.data;
+const href = collectionUrl('articles', article.id);
+const coverSrc = cover ? withBase(cover) : withBase('/images/articles/placeholder-cover.svg');
+---
+
+<article class="card">
+  <a href={href} class="card__link">
+    <img src={coverSrc} alt="" class="card__image" loading="lazy" />
+    <div class="card__body">
+      <div class="card__meta">
+        <span class="tag">{category}</span>
+        <time datetime={date.toISOString()}>{formatDate(date)}</time>
+      </div>
+      <h3 class="card__title">{title}</h3>
+      <p class="card__desc">{description}</p>
+      {tags.length > 0 && (
+        <div class="card__tags">
+          {tags.map((tag) => <span class="tag">{tag}</span>)}
+        </div>
+      )}
+    </div>
+  </a>
+</article>
