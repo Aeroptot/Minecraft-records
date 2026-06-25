@@ -79,6 +79,14 @@ export function extractHeadings(markdown: string): { depth: number; text: string
   return headings;
 }
 
+export type GalleryItem = { src: string; caption?: string };
+
+export function normalizeGalleryItem(
+  item: string | GalleryItem
+): GalleryItem {
+  return typeof item === 'string' ? { src: item } : item;
+}
+
 export function withBase(path: string): string {
   const base = import.meta.env.BASE_URL;
   if (path.startsWith('http') || path.startsWith('//')) return path;

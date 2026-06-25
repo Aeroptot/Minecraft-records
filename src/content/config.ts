@@ -12,6 +12,14 @@ const articleSchema = z.object({
   featured: z.boolean().default(false),
 });
 
+const galleryItemSchema = z.union([
+  z.string(),
+  z.object({
+    src: z.string().min(1, 'Gallery image path is required'),
+    caption: z.string().optional(),
+  }),
+]);
+
 const worldSchema = z.object({
   title: z.string().min(1, 'World entry title is required'),
   description: z.string().min(1, 'World entry description is required'),
@@ -22,7 +30,7 @@ const worldSchema = z.object({
   coordinates: z.string().optional(),
   tags: z.array(z.string()).default([]),
   cover: z.string().optional(),
-  gallery: z.array(z.string()).default([]),
+  gallery: z.array(galleryItemSchema).default([]),
   relatedArticles: z.array(z.string()).default([]),
   draft: z.boolean().default(false),
   featured: z.boolean().default(false),

@@ -1,7 +1,7 @@
 ---
 import { getCollection, render } from 'astro:content';
 import WorldEntryLayout from '../../layouts/WorldEntryLayout.astro';
-import { isPublished, sortByDateAsc, withBase, getSlug, collectionUrl } from '../../utils/content';
+import { isPublished, sortByDateAsc, extractHeadings, getSlug, collectionUrl } from '../../utils/content';
 
 export async function getStaticPaths() {
   const entries = sortByDateAsc(
@@ -33,9 +33,12 @@ export async function getStaticPaths() {
 }
 
 const { entry, prev, next, relatedArticles } = Astro.props;
-const { Content } = await render(entry);
+const { Content, headings: astroHeadings } = await render(entry);
+const headings = astroHeadings.length > 0
+  ? astroHeadings.map((h) => ({ depth: h.depth, text: h.text, slug: h.slug }))
+  : extractHeadings(entry.body ?? '');
 ---
 
-<WorldEntryLayout entry={entry} prev={prev} next={next} relatedArticles={relatedArticles}>
+<WorldEntryLayout entry={entry} prev={prev} next={next} relatedArticles={relatedArticles} headings={headings}>
   <Content />
 </WorldEntryLayout>

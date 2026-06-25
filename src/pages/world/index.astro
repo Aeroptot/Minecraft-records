@@ -3,11 +3,15 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import WorldOverview from '../../components/WorldOverview.astro';
 import WorldTimelineCard from '../../components/WorldTimelineCard.astro';
 import { getCollection } from 'astro:content';
-import { isPublished, sortByDateDesc, withBase } from '../../utils/content';
+import { isPublished, sortByDateDesc, withBase, normalizeGalleryItem } from '../../utils/content';
 
 const allEntries = (await getCollection('world')).filter(isPublished);
 const featuredGallery = allEntries
-  .flatMap((e) => (e.data.gallery.length > 0 ? e.data.gallery : e.data.cover ? [e.data.cover] : []))
+  .flatMap((e) => {
+    const items = e.data.gallery.map(normalizeGalleryItem);
+    if (items.length > 0) return items.map((item) => item.src);
+    return e.data.cover ? [e.data.cover] : [];
+  })
   .slice(0, 6);
 ---
 
@@ -55,9 +59,9 @@ const featuredGallery = allEntries
       </div>
 
       <div class="timeline" id="timeline">
-        {sortByDateDesc(allEntries).map((entry, i) => (
+        {sortByDateDesc(allEntries).map((entry) => (
           <div class="timeline__item" data-date={entry.data.date.getTime()}>
-            <WorldTimelineCard entry={entry} index={i} />
+            <WorldTimelineCard entry={entry} />
           </div>
         ))}
       </div>
@@ -145,6 +149,23 @@ const featuredGallery = allEntries
   .timeline {
     display: flex;
     flex-direction: column;
-    gap: var(--space-xl);
+    gap: 0;
+  }
+
+  .timeline__item {
+    padding-bottom: var(--space-lg);
+  }
+
+  .timeline__item:last-child {
+    padding-bottom: 0;
+  }
+
+  .timeline__item:last-child :global(.timeline-card__marker::after) {
+    display: none;
+  }
+
+  .timeline__item:not(:last-child) :global(.timeline-card__marker::after) {
+    margin-bottom: calc(-1 * var(--space-lg));
+    padding-bottom: var(--space-lg);
   }
 </style>

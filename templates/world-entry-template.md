@@ -13,9 +13,11 @@ tags:
   - base
   - early-game
 cover: "/images/world/example-cover.png"  # Optional — main screenshot
-gallery:                  # Optional — additional screenshots
-  - "/images/world/example-1.png"
-  - "/images/world/example-2.png"
+gallery:
+  - src: "/images/world/example-1.png"
+    caption: "Describe what this screenshot shows"
+  - src: "/images/world/example-2.png"
+    caption: "Another view or detail"
 relatedArticles:          # Optional — links to published articles
   - "/articles/example-article-slug/"
 draft: true               # Set to false when ready to publish

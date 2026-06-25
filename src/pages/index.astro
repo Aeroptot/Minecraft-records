@@ -109,7 +109,7 @@ const featuredWorld = allWorld.find((e) => e.data.featured) ?? allWorld[0];
       {latestWorld.length > 0 ? (
         <div class="home-timeline">
           {latestWorld.map((entry, i) => (
-            <WorldTimelineCard entry={entry} index={i} />
+            <WorldTimelineCard entry={entry} showCover={true} />
           ))}
         </div>
       ) : (

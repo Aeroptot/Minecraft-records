@@ -1,13 +1,13 @@
 ---
-import { formatDate, withBase, collectionUrl } from '../utils/content';
+import { formatDate, collectionUrl, withBase } from '../utils/content';
 import type { CollectionEntry } from 'astro:content';
 
 interface Props {
   entry: CollectionEntry<'world'>;
-  index?: number;
+  showCover?: boolean;
 }
 
-const { entry, index = 0 } = Astro.props;
+const { entry, showCover = false } = Astro.props;
 const {
   title,
   description,
@@ -19,34 +19,33 @@ const {
   tags,
 } = entry.data;
 const href = collectionUrl('world', entry.id);
-const coverSrc = cover ? withBase(cover) : withBase('/images/world/placeholder-cover.svg');
 ---
 
-<article class="timeline-card card">
+<article class="timeline-card">
   <div class="timeline-card__marker" aria-hidden="true">
     <span class="timeline-card__dot"></span>
   </div>
   <div class="timeline-card__content">
-    <a href={href} class="timeline-card__link card__link">
+    <a href={href} class="timeline-card__link">
       <div class="timeline-card__header">
         <time class="timeline-card__date" datetime={date.toISOString()}>{formatDate(date)}</time>
         <span class="tag">{phase}</span>
       </div>
-      <h3 class="card__title">{title}</h3>
-      <p class="card__desc">{description}</p>
+      <h3 class="timeline-card__title">{title}</h3>
+      <p class="timeline-card__desc">{description}</p>
       <div class="timeline-card__meta">
         <span>v{minecraftVersion}</span>
         {location && <span>{location}</span>}
       </div>
       {tags.length > 0 && (
-        <div class="card__tags">
+        <div class="timeline-card__tags">
           {tags.map((tag) => <span class="tag">{tag}</span>)}
         </div>
       )}
     </a>
-    {cover && (
+    {showCover && cover && (
       <a href={href} class="timeline-card__image-link" tabindex="-1" aria-hidden="true">
-        <img src={coverSrc} alt="" class="timeline-card__image" loading="lazy" />
+        <img src={withBase(cover)} alt="" class="timeline-card__image" loading="lazy" />
       </a>
     )}
   </div>
@@ -56,35 +55,30 @@ const coverSrc = cover ? withBase(cover) : withBase('/images/world/placeholder-c
   .timeline-card {
     display: grid;
     grid-template-columns: 2rem 1fr;
-    gap: var(--space-lg);
-    position: relative;
-    background: transparent;
-    border: none;
-    box-shadow: none;
+    gap: var(--space-md);
+    align-items: start;
   }
 
   .timeline-card__marker {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding-top: var(--space-lg);
+    padding-top: var(--space-md);
   }
 
   .timeline-card__marker::after {
     content: '';
     flex: 1;
     width: 2px;
+    min-height: var(--space-md);
     background: var(--color-border-strong);
     margin-top: var(--space-sm);
-  }
-
-  .timeline-card:last-child .timeline-card__marker::after {
-    display: none;
   }
 
   .timeline-card__dot {
     width: 12px;
     height: 12px;
+    flex-shrink: 0;
     background: var(--color-accent);
     border: 2px solid var(--color-accent-dark);
     box-shadow: 0 0 0 3px var(--color-accent-light);
@@ -94,7 +88,7 @@ const coverSrc = cover ? withBase(cover) : withBase('/images/world/placeholder-c
     background: var(--color-bg-card);
     border: 1px solid var(--color-border);
     box-shadow: var(--shadow-sm);
-    transition: box-shadow var(--transition), transform var(--transition);
+    transition: box-shadow var(--transition);
   }
 
   .timeline-card__content:hover {
@@ -102,7 +96,14 @@ const coverSrc = cover ? withBase(cover) : withBase('/images/world/placeholder-c
   }
 
   .timeline-card__link {
+    display: block;
     padding: var(--space-lg);
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .timeline-card__link:hover {
+    color: inherit;
   }
 
   .timeline-card__header {
@@ -119,12 +120,34 @@ const coverSrc = cover ? withBase(cover) : withBase('/images/world/placeholder-c
     color: var(--color-text-muted);
   }
 
+  .timeline-card__title {
+    font-family: var(--font-display);
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin: 0 0 var(--space-sm);
+    line-height: 1.3;
+  }
+
+  .timeline-card__desc {
+    font-size: 0.9375rem;
+    color: var(--color-text-muted);
+    margin: 0 0 var(--space-sm);
+    line-height: 1.55;
+  }
+
   .timeline-card__meta {
     display: flex;
+    flex-wrap: wrap;
     gap: var(--space-md);
     font-size: 0.8125rem;
     color: var(--color-text-muted);
     margin-bottom: var(--space-sm);
+  }
+
+  .timeline-card__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
   }
 
   .timeline-card__image-link {
@@ -141,7 +164,6 @@ const coverSrc = cover ? withBase(cover) : withBase('/images/world/placeholder-c
   @media (max-width: 600px) {
     .timeline-card {
       grid-template-columns: 1.25rem 1fr;
-      gap: var(--space-md);
     }
   }
 </style>

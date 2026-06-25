@@ -1,6 +1,7 @@
 ---
 import BaseLayout from './BaseLayout.astro';
-import { formatDate, withBase, collectionUrl } from '../utils/content';
+import TableOfContents from '../components/TableOfContents.astro';
+import { formatDate, withBase, collectionUrl, normalizeGalleryItem } from '../utils/content';
 import type { CollectionEntry } from 'astro:content';
 
 interface Props {
@@ -8,9 +9,10 @@ interface Props {
   prev?: CollectionEntry<'world'>;
   next?: CollectionEntry<'world'>;
   relatedArticles?: { href: string; title: string }[];
+  headings: { depth: number; text: string; slug: string }[];
 }
 
-const { entry, prev, next, relatedArticles = [] } = Astro.props;
+const { entry, prev, next, relatedArticles = [], headings } = Astro.props;
 const {
   title,
   description,
@@ -23,6 +25,8 @@ const {
   cover,
   gallery,
 } = entry.data;
+
+const galleryItems = gallery.map(normalizeGalleryItem);
 ---
 
 <BaseLayout title={title} description={description} image={cover}>
@@ -52,19 +56,29 @@ const {
       )}
     </header>
 
-    <div class="world-entry__content container container--narrow prose">
-      <slot />
+    <div class="world-entry__layout container">
+      {headings.length > 2 && (
+        <aside class="world-entry__toc">
+          <TableOfContents headings={headings} />
+        </aside>
+      )}
+      <div class="world-entry__content prose">
+        <slot />
+      </div>
     </div>
 
-    {gallery.length > 0 && (
+    {galleryItems.length > 0 && (
       <section class="world-entry__gallery section">
         <div class="container">
           <span class="section__label">Gallery</span>
           <h2 class="section__title">Screenshots</h2>
           <div class="world-entry__gallery-grid">
-            {gallery.map((src) => (
+            {galleryItems.map(({ src, caption }) => (
               <figure class="world-entry__gallery-item">
-                <img src={withBase(src)} alt="" loading="lazy" />
+                <div class="world-entry__gallery-frame">
+                  <img src={withBase(src)} alt={caption ?? ''} loading="lazy" />
+                </div>
+                {caption && <figcaption class="world-entry__gallery-caption">{caption}</figcaption>}
               </figure>
             ))}
           </div>
@@ -170,27 +184,65 @@ const {
     box-shadow: var(--shadow-md);
   }
 
-  .world-entry__content {
+  .world-entry__layout {
+    display: grid;
+    grid-template-columns: 14rem 1fr;
+    gap: var(--space-2xl);
     padding-block: var(--space-2xl);
+    align-items: start;
+  }
+
+  .world-entry__toc {
+    position: sticky;
+    top: calc(var(--nav-height) + var(--space-lg));
+  }
+
+  .world-entry__content {
+    min-width: 0;
   }
 
   .world-entry__gallery-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
-    gap: var(--space-lg);
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
+    gap: var(--space-xl);
   }
 
-  .world-entry__gallery-item img {
-    width: 100%;
-    aspect-ratio: 16 / 9;
-    object-fit: cover;
+  .world-entry__gallery-item {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .world-entry__gallery-frame {
+    height: 14rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-sm);
+    background: var(--color-bg-alt);
     border: 1px solid var(--color-border);
     box-shadow: var(--shadow-sm);
     transition: box-shadow var(--transition);
   }
 
-  .world-entry__gallery-item img:hover {
+  .world-entry__gallery-item:hover .world-entry__gallery-frame {
     box-shadow: var(--shadow-md);
+  }
+
+  .world-entry__gallery-frame img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+  }
+
+  .world-entry__gallery-caption {
+    margin-top: var(--space-sm);
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--color-text-muted);
+    text-align: center;
   }
 
   .world-entry__related-list {
@@ -235,6 +287,17 @@ const {
     font-family: var(--font-mono);
     font-size: 0.75rem;
     color: var(--color-accent);
+  }
+
+  @media (max-width: 900px) {
+    .world-entry__layout {
+      grid-template-columns: 1fr;
+    }
+
+    .world-entry__toc {
+      position: static;
+      order: -1;
+    }
   }
 
   @media (max-width: 600px) {

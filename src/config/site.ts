@@ -27,10 +27,10 @@ export const siteConfig = {
   ],
 
   currentObjectives: [
-    'Expand the main base storage wing',
-    'Build a fully automatic iron farm',
-    'Document the nether hub redesign',
-    'Explore the new 1.21 trial chambers',
+    'Build more automated machines around the base',
+    'Build the expansive base in End',
+    'Plan for the wither skeleton farm',
+    'Optimize the sand duper',
   ],
 
   worldOverview: {
@@ -48,7 +48,7 @@ export const siteConfig = {
   },
 
   featuredScreenshot: '/images/world/featured-landscape.svg',
-  heroImage: '/images/world/hero-banner.svg',
+  heroImage: '/images/world/hero-banner.jpg',
 } as const;
 
 export type SiteConfig = typeof siteConfig;
