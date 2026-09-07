@@ -5,8 +5,8 @@
 export const siteConfig = {
   title: 'Overworld Archive',
   tagline: 'A personal chronicle of one Minecraft world',
-  name: '[Your Name]',
-  bio: 'I am a highschool student who enjoys playing minecraft and designing hardcore builds and machines in game. I learn from both Chinese and English sources about the game, which makes my tutorial style unique and inspiring',
+  name: 'Max Zhang',
+  bio: 'I am a high school student who enjoys playing Minecraft and designing hardcore builds and machines in game. I learn from both Chinese and English sources about the game, which makes my tutorial style unique and inspiring',
   projectIntro:
     'This site documents my long-term Minecraft single-player world — builds, redstone contraptions, survival milestones, and the lessons learned along the way. Every article and timeline entry is written in Obsidian and published through GitHub.',
   github: 'https://github.com/aeroptot',

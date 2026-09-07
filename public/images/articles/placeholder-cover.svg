@@ -1,6 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450">
-  <rect width="800" height="450" fill="#e8f0ea"/>
-  <rect x="40" y="40" width="720" height="370" fill="#f3f2ee" stroke="#c8c6bc" stroke-width="2"/>
-  <text x="400" y="210" text-anchor="middle" font-family="monospace" font-size="18" fill="#5c5c58">Placeholder  Article Cover</text>
-  <text x="400" y="240" text-anchor="middle" font-family="monospace" font-size="14" fill="#8b7355">Replace with /public/images/articles/your-image.png</text>
-</svg>

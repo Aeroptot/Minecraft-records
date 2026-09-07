@@ -13,7 +13,7 @@ tags:
 cover: /images/world/first-base-shot-6.25.jpg
 gallery:
   - src: /images/world/furnace-group48-6.25.jpg
-    caption: "Furnace group powered by carpet duplication — replace with your own caption"
+    caption: "Furnace group powered by carpet duplication"
 relatedArticles:
   - "/articles/starter-base-layout/"
 draft: false
